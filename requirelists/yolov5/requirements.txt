@@ -1,0 +1,43 @@
+# pip install -r requirements.txt
+# pip install torch==1.10.0+cu102 torchvision==0.11.1+cu102 torchaudio===0.10.0+cu102 -f https://download.pytorch.org/whl/cu102/torch_stable.html
+# cd deep-person-reid to RUN || python setup.py develop || to install toureld for object detection
+# YOLOv5 ----------------------------------------
+
+matplotlib>=3.2.2
+numpy>=1.18.5
+opencv-python>=4.1.2
+Pillow>=7.1.2
+PyYAML>=5.3.1
+requests>=2.23.0
+scipy>=1.4.1
+# torch>=1.7.0
+# torchvision>=0.8.1
+tqdm>=4.41.0
+
+# plotting ------------------------------------
+
+pandas>=1.1.4
+seaborn>=0.11.0
+
+# deep_sort -----------------------------------
+
+easydict
+
+# torchreid ----------------------------------
+
+Cython
+h5py
+six
+tb-nightly
+future
+yacs
+gdown
+flake8
+yapf
+isort==4.3.21
+imageio
+
+
+# Analyzer ------------------------------------
+Shapely==1.8.0
+
