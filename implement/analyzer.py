@@ -2,8 +2,9 @@
 # Analyze is list of Bdeepsort
 from numpy.core.defchararray import count
 from implement.bdeepsort import Bdeepsort
-
+import numpy as np
 import sys
+
 
 sys.path.insert(0, 'object_detection/yolov5')
 from object_detection.yolov5.utils.plots import Annotator, colors
@@ -30,10 +31,18 @@ class Analyzer(object):
         self.max_age = max_age
         self.max_channel = self.cfg.ANALYZER.MAX_CHANNEL
         self.min_length_update = self.cfg.ANALYZER.MIN_LENGTH_UPDATE_BUFFER
+        #self.max_length_update = self.cfg.ANALYZER.MAX_LENGTH_UPDATE_BUFFER
+        self.max_length_update = 5000
         self.show_yolo_result = self.cfg.ANALYZER.SHOW_YOLO_RESULT
         self.max_live_polygon_count = self.cfg.ANALYZER.MAX_LIVE_POLYGON_COUNT
         self.length_check_polygon = self.cfg.ANALYZER.LENGTH_CHECK_POLYGON
-        self.polygons = polygons
+        self.polygons = self.cfg.ANALYZER.PLACE_TEST
+        # print("OR POLYGONS: ", polygons)
+        # print("OR TYPE : ", type(polygons))
+        
+        # print("POLUGON : ", self.polygons)
+        # print("TYPE : ", type(self.polygons))
+        
         
         # define parameter list of buffer deepsort ## type hint
         self.buffer_list = {int: Bdeepsort}
@@ -73,7 +82,7 @@ class Analyzer(object):
                 # center_current_x, center_current_y = bboxes_to_center(bboxes)   
                 if (self.buffer_list.get(id) is None):
                     # create new buffer
-                    self.buffer_list[id] = Bdeepsort(track_id=id, class_id=cls, bbox=bboxes, min_dist_update=30, max_buffer=5, conf=conf, max_dist_update=200)
+                    self.buffer_list[id] = Bdeepsort(track_id=id, class_id=cls, bbox=bboxes, min_dist_update=self.min_length_update, max_buffer=5, conf=conf, max_dist_update=self.max_length_update)
                 else:
                     # update main parameter buffer
                     
@@ -130,7 +139,7 @@ class Analyzer(object):
                                         # if direction of obj move less than 90 is mean obj moving in the same direction
                                         if(
                                             direct_normal is not None 
-                                            and direct_normal < 90 
+                                            and direct_normal < 120
                                             and count_live_polygon >= self.max_live_polygon_count
                                             
                                         ):
@@ -193,7 +202,7 @@ class Analyzer(object):
                         # if direction of obj move less than 90 is mean obj moving in the same direction
                         if(
                             direct_normal is not None 
-                            and direct_normal < 90 
+                            and direct_normal < 120
                             and count_live_polygon >= self.max_live_polygon_count
                         ):
                             if(angle_outer > 180):

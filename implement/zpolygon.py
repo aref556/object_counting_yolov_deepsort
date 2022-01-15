@@ -101,8 +101,8 @@ class Datazpolygon(object):
         self.path.append(box)
             
     def calculate_angle(self, xmin ,ymin, xmax, ymax):
-        direct_x = xmax - xmin
-        direct_y = ymax - ymin
+        direct_x = xmax - xmin + 1
+        direct_y = ymax - ymin + 1
         
         x_lenght = abs(xmax - xmin)
         y_lenght = abs(ymax - ymin)

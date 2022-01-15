@@ -11,6 +11,7 @@ class Bdeepsort(object):
         self.max_dist_update = max_dist_update
         self.max_buffer = max_buffer
         self.conf = conf
+        self.before_center = None
         
         self.frame = {}
         self.count_frame = 0
@@ -32,8 +33,8 @@ class Bdeepsort(object):
         return np.linalg.norm(a-b)
     
     def calculate_angle(self, xmin ,ymin, xmax, ymax):
-        direct_x = xmax - xmin
-        direct_y = ymax - ymin
+        direct_x = xmax - xmin + 1
+        direct_y = ymax - ymin + 1
         
         x_lenght = abs(xmax - xmin)
         y_lenght = abs(ymax - ymin)
@@ -77,13 +78,23 @@ class Bdeepsort(object):
         self.bbox = box
         self.conf = conf
         name_frame = self.count_frame + 1
+        name_before_frame = self.count_frame
         if(self.count_frame < self.max_buffer):
-            if(self.frame.get(name_frame) is None):
+            # if(self.frame.get(name_frame) is None):
+            if (self.frame.get(name_before_frame) is not None):
+                distance = self.calculate_distance_p2p((self.frame[name_before_frame]), (x_curr, y_curr))
+                #if (distance > self.min_dist_update and distance < self.max_dist_update):
+                if (distance > self.min_dist_update and distance < self.max_dist_update):
+                    self.frame[name_frame] = (x_curr, y_curr)
+                    self.count_frame += 1     
+            else:
                 self.frame[name_frame] = (x_curr, y_curr)
                 self.count_frame += 1
-            else:
-                self.frame.update({name_frame: (x_curr, y_curr)})
-                self.count_frame += 1
+            # else:
+                
+            #     # if (distance < self.max_dist_update):
+            #     self.frame.update({name_frame: (x_curr, y_curr)})
+            #     self.count_frame += 1
                 
         else:
             # check to make sure object moving
@@ -91,7 +102,8 @@ class Bdeepsort(object):
             distance = self.calculate_distance_p2p((self.frame[before_last_frame]), (x_curr, y_curr))
             # print(distance)
             
-            if (distance > self.min_dist_update and distance < self.max_dist_update):
+            #if (distance > self.min_dist_update and distance < self.max_dist_update):
+            if (distance > self.min_dist_update):
                 # shift frame like window
                 for i in range(0, self.max_buffer):
                     name_update = i+1
@@ -101,12 +113,12 @@ class Bdeepsort(object):
                     else:
                         self.frame.update({name_update: self.frame[name_dest]})
                 
-                # and then calculate angle 
-                x1, y1 = self.frame[1]
-                x2, y2 = self.frame[self.max_buffer]
-                
-                angle = self.calculate_angle(x1, y1, x2, y2)
-                self.angle = angle
+            # and then calculate angle 
+            x1, y1 = self.frame[1]
+            x2, y2 = self.frame[self.max_buffer]
+            
+            angle = self.calculate_angle(x1, y1, x2, y2)
+            self.angle = angle
     
     def update_enter_polygon_flag(self, flag):
         self.in_polygon_flag = flag   

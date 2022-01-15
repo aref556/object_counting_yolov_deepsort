@@ -37,12 +37,13 @@ from implement.zpolygon import Zpolygon
 
 PATH_TO_CONFIG_DEEPSORT = 'object_tracking/deep_sort/configs/deep_sort.yaml'
 PATH_TO_CONFIG_ANALYZER = 'implement/configs/analyzer.yaml'
-PATH_WEIGHT_YOLOV5 = 'object_detection/yolov5/weights/yolov5l6.pt'
+#PATH_WEIGHT_YOLOV5 = 'object_detection/yolov5/weights/yolov5x6.pt'
+PATH_WEIGHT_YOLOV5 = 'object_detection/yolov5/weights/yolov5m6.pt'
 PATH_SOURCE ='videos/t3.mkv'
 
 # PATH_SAVE_MP4="outputs/t1.mp4"
 PATH_SAVE_FOLDER = 'inference/output/torchreld'
-SAVE_NAME = 's2_yolov5l6_polypoly_repair_resnet50'
+SAVE_NAME = 'ประตูใหม่หน้ามอ-พื้นที่การนับ-3-mobilenetv2_x1_0-ตย-1'
 
 def main():
     print('cuda is available ?', torch.cuda.is_available())
@@ -59,8 +60,8 @@ def main():
         # [(400,500),(600,200), (800, 200),(750,500),(600,580)], 
         [(400, 500),(600, 200), (800, 200), (750, 500)], 
         [(790, 500), (830, 200), (1100,200), (1150, 500)], 
-        [(1190, 500), (1130, 200), (1300,200), (1550, 500)],
-        [(780, 900),(780, 600), (1200, 600), (1200, 900)]
+        [(1190, 500), (1130, 200), (1300,200), (1550, 500)]
+        # [(780, 900),(780, 600), (1200, 600), (1200, 900)]
     ]
     # # The MOT16 evaluation runs multiple inference streams in parallel, each one writing to
     # # its own .txt file. Hence, in that case, the output folder is not restored
@@ -70,9 +71,10 @@ def main():
     #         shutil.rmtree(out)  # delete output folder
     #     os.makedirs(out)  # make new output folder
     
-    # create Detector is Yolov5 classes=(2,7)
+    # create Detector is Yolov5 classes=(2, 5, 6, 7, 8)
+    # ประตูใหม่หน้่า มอ
     detector = Detector(ckpt=PATH_WEIGHT_YOLOV5, conf_thres=0.3, classes=(2, 5, 6, 7, 8))
-    
+
     # create Tracker is Deepsort
     tracker = Tracker(path_config=PATH_TO_CONFIG_DEEPSORT)
     
@@ -161,8 +163,12 @@ def main():
                 # print("xywhs  ", xywhs)
                 confs = det[:, 4]
                 confs_mod = confs.cpu()
-                # print("confs  ", confs_mod)
-                confs_mod = torch.tensor([max(confs_mod)]) 
+                # print("==================")
+                # print("conf_mod  ", confs_mod)
+                
+                # print("confs  ", max(confs_mod).cpu())
+                confs_mod = torch.tensor([max(confs_mod)])
+                # print("conf_mod  ", confs_mod)
                             
                 # print("confs mod  ", confs_mod)
                 # ...
@@ -170,6 +176,7 @@ def main():
                 
                 clss_mod = clss.cpu()
                 # print("clsss  ", clss_mod)
+                # print("==================")
                 
                 # class collapse
                 if len(clss_mod) > 0:
@@ -197,7 +204,7 @@ def main():
                 deepsort_outputs = tracker.deepsort.update(xywhs.cpu(), confs_mod, clss_mod, im0)
                 t5 = time_sync()
                 # pass analysis to rdeepsort
-                analyzer.update(deepsort_output=deepsort_outputs, confs=confs, names=detector.names, annotator=annotator)
+                analyzer.update(deepsort_output=deepsort_outputs, confs=confs_mod, names=detector.names, annotator=annotator)
                 
             else:
                 tracker.deepsort.increment_ages()
